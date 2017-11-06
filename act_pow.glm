@@ -1,11 +1,11 @@
 #set profiler=1
 //#set threadcount=1;
 //#set relax_naming_rules=1
-#set minimum_timestep=60;
+#set minimum_timestep=3600;
 
 clock {
-	timestamp '2010-06-21 06:00:00';
-	stoptime '2010-06-21 13:00:00';
+	timestamp '2009-11-01 00:00:00';
+	stoptime '2009-11-01 10:00:00';
 	timezone PST+8PDT;
 	
 }
@@ -26,15 +26,7 @@ module powerflow {
 
 #define stylesheet=http://gridlab-d.svn.sourceforge.net/viewvc/gridlab-d/trunk/core/gridlabd-2_0
 
-object csv_reader{
-	name CsvReader;
-	filename weather.csv;
-};
 
-
-object climate{
-	tmyfile "WA-Yakima.tmy2";
-}
 
 object triplex_line_conductor {
 	name tp_line_conductor_OH;
@@ -76,6 +68,8 @@ object triplex_line_configuration {
 	secondary_voltage 122.4 V;
 	//power_rating 150.0;
 	powerA_rating 75.0;
+	//resistance 0.013;
+	//reactance 0.0348;
 	resistance 0.01716;
 	reactance 0.03575;
 }
@@ -92,7 +86,7 @@ object meter {
 	nominal_voltage 14400;
 	object recorder {	                	       
        	     	              	file measured_voltage_A.csv;
-       	     	                     interval 60;
+       	     	                     interval 3600;
        	     	                     property measured_voltage_A;
 	     	     	     };
 }
@@ -117,8 +111,8 @@ object triplex_meter {
 	
 	object recorder {	                	       
        	     	              	file measured_voltage_distribution_transformer.csv;
-       	     	                     interval 60;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power,measured_reactive_power;
+       	     	                     interval 3600;
+       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
 	     	     	     };
 	
 }
@@ -141,6 +135,12 @@ object triplex_meter{
        file power.player;
      //  loop 1000;
    }; 
+   object player {
+       name player1_1;
+   	   property power_2;
+       file power.player;
+     //  loop 1000;
+   }; 
 	   //voltage_N 0;
 	   ////voltage_1 240;
 	    //voltage_2 240;
@@ -148,42 +148,10 @@ object triplex_meter{
        groupid House_Meter;
 	   	   object recorder {	                	       
        	     	              	file measured_voltage_1_node3.csv;
-       	     	                     interval 60;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power,measured_reactive_power;
+       	     	                     interval 3600;
+       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
 	     	     	     };
-      object inverter {
-       name inv_1;
-       phases AS;
-       four_quadrant_control_mode CONSTANT_PQ;
-       generator_status ONLINE;
-       inverter_type FOUR_QUADRANT;
-	   rated_power 8400;
-	   ////P_Out 6250;
-	   Q_Out 0;
-	   use_multipoint_efficiency FALSE;
-       object recorder {	                	       
-       	     	              	file Power_A_node3.csv;
-       	     	                     interval 60;
-       	     	                     property power_A.real,power_A.imag,P_Out,Q_Out;
-	     	     	     };
-             object solar {
-              name sol_1;
-             generator_mode SUPPLY_DRIVEN;
-             generator_status ONLINE;
-             panel_type SINGLE_CRYSTAL_SILICON;
-             efficiency 0.167;
-			 ////Insolation 100;
-             area 800;
-			             object recorder {	                	       
-	     	              	file V_Out_node3.csv;
-	     	                      interval 60;
-	     	                     // limit 86400;
-	     	           	property V_Out,I_Out,VA_Out.real;
-	     	     	     };
-	
-            };
-          
-      };
+      
       
 
 }
@@ -212,48 +180,22 @@ object triplex_meter {
        file power.player;
      //  loop 1000;
    }; 
+   object player {
+       name player2_1;
+       property power_2;
+       file power.player;
+     //  loop 1000;
+   }; 
 		//voltage_N 0;
 	   //voltage_1 240;
 	   nominal_voltage 120;
        groupid House_Meter;
 	   object recorder {	                	       
        	     	              	file measured_voltage_1_node4.csv;
-       	     	                     interval 60;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power,measured_reactive_power;
+       	     	                     interval 3600;
+       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
 	     	     	     };
-      object inverter {
-       name inv_2;
-        phases AS;
-       four_quadrant_control_mode CONSTANT_PQ;
-       generator_status ONLINE;
-       inverter_type FOUR_QUADRANT;
-	   rated_power 8400;
-	   //P_Out 6250;
-	   Q_Out 0;
-	   use_multipoint_efficiency FALSE;
-        object recorder {	                	       
-       	     	              	file Power_A_node4.csv;
-       	     	                     interval 60;
-       	     	                     property power_A.real,power_A.imag,P_Out,Q_Out;
-	     	     	     };
-             object solar {
-             name sol_2;
-             generator_mode SUPPLY_DRIVEN;
-             generator_status ONLINE;
-             panel_type SINGLE_CRYSTAL_SILICON;
-             efficiency 0.167;
-             area 800;
-			 //////Insolation 100;
-             object recorder {	                	       
-	     	              	file V_Out_node4.csv;
-	     	                      interval 60;
-	     	                     // limit 86400;
-	     	           	property V_Out,I_Out,VA_Out.real;
-	     	     	     };
-	
-            };
-          
-      };
+      
       
 
 }
@@ -299,48 +241,22 @@ object triplex_meter{
        file power.player;
      //  loop 1000;
    }; 
+	   object player {
+       name player3_1;
+       property power_2;
+       file power.player;
+     //  loop 1000;
+   }; 
 	   //voltage_1 240;
 	   //voltage_N 0;
 	   nominal_voltage 120;
        groupid House_Meter;
 	   object recorder {	                	       
        	     	              	file measured_voltage_1_node6.csv;
-       	     	                     interval 60;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power,measured_reactive_power;
+       	     	                     interval 3600;
+       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
 	     	     	     };
-      object inverter {
-       name inv_3;
-        phases AS;
-       four_quadrant_control_mode CONSTANT_PQ;
-       generator_status ONLINE;
-       inverter_type FOUR_QUADRANT;
-	   rated_power 8400;
-	   //P_Out 6250;
-	   Q_Out 0;
-	   use_multipoint_efficiency FALSE;
-        object recorder {	                	       
-       	     	              	file Power_A_node6.csv;
-       	     	                     interval 60;
-       	     	                     property power_A.real,power_A.imag,P_Out,Q_Out;
-	     	     	     };
-             object solar {
-             name sol_3;
-             generator_mode SUPPLY_DRIVEN;
-             generator_status ONLINE;
-             panel_type SINGLE_CRYSTAL_SILICON;
-             efficiency 0.167;
-             area 800;
-			 ////Insolation 100;
-             object recorder {	                	       
-	     	              	file V_Out_node6.csv;
-	     	                      interval 60;
-	     	                     // limit 86400;
-	     	           	property V_Out,I_Out,VA_Out.real;
-	     	     	     };
-	
-            };
-          
-      };
+      
       
 
 }
@@ -369,47 +285,21 @@ object triplex_meter {
        file power.player;
      //  loop 1000;
    }; 
+	  object player {
+       name player4_1;
+       property power_2;
+       file power.player;
+     //  loop 1000;
+   };  
 	   //voltage_1 240;
 	   //voltage_N 0;
 	   nominal_voltage 120;
        groupid House_Meter;
 	   object recorder {	                	       
        	     	              	file measured_voltage_1_node7.csv;
-       	     	                     interval 60;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power,measured_reactive_power;
+       	     	                     interval 3600;
+       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
 	     	     	     };
-      object inverter {
-       name inv_4;
-       phases AS;
-       four_quadrant_control_mode CONSTANT_PQ;
-       generator_status ONLINE;
-       inverter_type FOUR_QUADRANT;
-	   rated_power 8400;
-	   //P_Out 6250;
-	   Q_Out 0;
-	   use_multipoint_efficiency FALSE;
-        object recorder {	                	       
-       	     	              	file Power_A_node7.csv;
-       	     	                     interval 60;
-       	     	                     property power_A.real,power_A.imag,P_Out,Q_Out;
-	     	     	     };
-             object solar {
-             name sol_4;
-             generator_mode SUPPLY_DRIVEN;
-             generator_status ONLINE;
-             panel_type SINGLE_CRYSTAL_SILICON;
-             efficiency 0.167;
-             area 800;
-             object recorder {	                	       
-	     	              	file V_Out_node7.csv;
-	     	                      interval 60;
-	     	                     // limit 86400;
-	     	           	property V_Out,I_Out,VA_Out.real;
-	     	     	     };
-	
-            };
-          
-      };
       
 
 }
@@ -455,47 +345,22 @@ object triplex_meter{
        file power.player;
      //  loop 1000;
    }; 
-	   //voltage_1 240;
+	  object player {
+       name player5_1;
+       property power_2;
+       file power.player;
+     //  loop 1000;
+   }; 
+	  //voltage_1 240;
 	   //voltage_N 0;
 	   nominal_voltage 120;
        groupid House_Meter;
 	   object recorder {	                	       
        	     	              	file measured_voltage_1_node9.csv;
-       	     	                     interval 60;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power,measured_reactive_power;
+       	     	                     interval 3600;
+       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
 	     	     	     };
-      object inverter {
-       name inv_5;
-        phases AS;
-       four_quadrant_control_mode CONSTANT_PQ;
-       generator_status ONLINE;
-       inverter_type FOUR_QUADRANT;
-	   rated_power 8400;
-	   //P_Out 6250;
-	   Q_Out 0;
-	   use_multipoint_efficiency FALSE;
-        object recorder {	                	       
-       	     	              	file Power_A_node9.csv;
-       	     	                     interval 60;
-       	     	                     property power_A.real,power_A.imag,P_Out,Q_Out;
-	     	     	     };
-             object solar {
-              name sol_5;
-             generator_mode SUPPLY_DRIVEN;
-             generator_status ONLINE;
-             panel_type SINGLE_CRYSTAL_SILICON;
-             efficiency 0.167;
-             area 800;
-             object recorder {	                	       
-	     	              	file V_Out_node9.csv;
-	     	                      interval 60;
-	     	                     // limit 86400;
-	     	           	property V_Out,I_Out,VA_Out.real;
-	     	     	     };
-	
-            };
-          
-      };
+      
       
 
 }
@@ -524,47 +389,22 @@ object triplex_meter {
        file power.player;
      //  loop 1000;
    }; 
+	   object player {
+       name player6_1;
+       property power_2;
+       file power.player;
+     //  loop 1000;
+   }; 
 	   //voltage_1 240;
 	   //voltage_N 0;
 	   nominal_voltage 120;
        groupid House_Meter;
 	   object recorder {	                	       
        	     	              	file measured_voltage_1_node10.csv;
-       	     	                     interval 60;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power,measured_reactive_power;
+       	     	                     interval 3600;
+       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
 	     	     	     };
-      object inverter {
-       name inv_6;
-        phases AS;
-       four_quadrant_control_mode CONSTANT_PQ;
-       generator_status ONLINE;
-       inverter_type FOUR_QUADRANT;
-	   rated_power 8400;
-	   //P_Out 6250;
-	   Q_Out 0;
-	   use_multipoint_efficiency FALSE;
-        object recorder {	                	       
-       	     	              	file Power_A_node10.csv;
-       	     	                     interval 60;
-       	     	                     property power_A.real,power_A.imag,P_Out,Q_Out;
-	     	     	     };
-             object solar {
-             name sol_6;
-             generator_mode SUPPLY_DRIVEN;
-             generator_status ONLINE;
-             panel_type SINGLE_CRYSTAL_SILICON;
-             efficiency 0.167;
-             area 800;
-             object recorder {	                	       
-	     	              	file V_Out_node10.csv;
-	     	                      interval 60;
-	     	                     // limit 86400;
-	     	           	property V_Out,I_Out,VA_Out.real;
-	     	     	     };
-	
-            };
-          
-      };
+      
       
 
 }
@@ -608,47 +448,22 @@ object triplex_meter{
        file power.player;
      //  loop 1000;
    }; 
+	   object player {
+       name player7_1;
+       property power_2;
+       file power.player;
+     //  loop 1000;
+   }; 
 	   //voltage_1 240;
 	   nominal_voltage 120;
 	   //voltage_N 0;
        groupid House_Meter;
 	   object recorder {	                	       
        	     	              	file measured_voltage_1_node12.csv;
-       	     	                     interval 60;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power,measured_reactive_power;
+       	     	                     interval 3600;
+       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
 	     	     	     };
-      object inverter {
-       name inv_7;
-        phases AS;
-       four_quadrant_control_mode CONSTANT_PQ;
-       generator_status ONLINE;
-       inverter_type FOUR_QUADRANT;
-	   rated_power 8400;
-	   //P_Out 6250;
-	   Q_Out 0;
-	   use_multipoint_efficiency FALSE;
-        object recorder {	                	       
-       	     	              	file Power_A_node12.csv;
-       	     	                     interval 60;
-       	     	                     property power_A.real,power_A.imag,P_Out,Q_Out;
-	     	     	     };
-             object solar {
-              name sol_7;
-             generator_mode SUPPLY_DRIVEN;
-             generator_status ONLINE;
-             panel_type SINGLE_CRYSTAL_SILICON;
-             efficiency 0.167;
-             area 800;
-             object recorder {	                	       
-	     	              	file V_Out_node12.csv;
-	     	                      interval 60;
-	     	                     // limit 86400;
-	     	           	property V_Out,I_Out,VA_Out.real;
-	     	     	     };
-	
-            };
-          
-      };
+      
       
 
 }
@@ -677,47 +492,21 @@ object triplex_meter {
        file power.player;
      //  loop 1000;
    }; 
-	   //voltage_1 240;
+	  object player {
+       name player8_1;
+       property power_2;
+       file power.player;
+     //  loop 1000;
+   }; 
+	  //voltage_1 240;
 	   //voltage_N 0;
 	   nominal_voltage 120;
        groupid House_Meter;
 	   object recorder {	                	       
        	     	              	file measured_voltage_1_node13.csv;
-       	     	                     interval 60;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power,measured_reactive_power;
+       	     	                     interval 3600;
+       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
 	     	     	     };
-      object inverter {
-       name inv_8;
-        phases AS;
-       four_quadrant_control_mode CONSTANT_PQ;
-       generator_status ONLINE;
-       inverter_type FOUR_QUADRANT;
-	   rated_power 8400;
-	   //P_Out 6250;
-	   Q_Out 0;
-	   use_multipoint_efficiency FALSE;
-        object recorder {	                	       
-       	     	              	file Power_A_node13.csv;
-       	     	                     interval 60;
-       	     	                     property power_A.real,power_A.imag,P_Out,Q_Out;
-	     	     	     };
-             object solar {
-             name sol_8;
-             generator_mode SUPPLY_DRIVEN;
-             generator_status ONLINE;
-             panel_type SINGLE_CRYSTAL_SILICON;
-             efficiency 0.167;
-             area 800;
-             object recorder {	                	       
-	     	              	file V_Out_node13.csv;
-	     	                      interval 60;
-	     	                     // limit 86400;
-	     	           	property V_Out,I_Out,VA_Out.real;
-	     	     	     };
-	
-            };
-          
-      };
       
 
 }
@@ -761,47 +550,22 @@ object triplex_meter{
        file power.player;
      //  loop 1000;
    }; 
+	   object player {
+       name player9_1;
+       property power_2;
+       file power.player;
+     //  loop 1000;
+   }; 
 	   //voltage_1 240;
 	   //voltage_N 0;
 	   nominal_voltage 120;
        groupid House_Meter;
 	   object recorder {	                	       
        	     	              	file measured_voltage_1_node15.csv;
-       	     	                     interval 60;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power,measured_reactive_power;
+       	     	                     interval 3600;
+       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
 	     	     	     };
-      object inverter {
-       name inv_9;
-        phases AS;
-       four_quadrant_control_mode CONSTANT_PQ;
-       generator_status ONLINE;
-       inverter_type FOUR_QUADRANT;
-	   rated_power 8400;
-	   //P_Out 6250;
-	   Q_Out 0;
-	   use_multipoint_efficiency FALSE;
-        object recorder {	                	       
-       	     	              	file Power_A_node15.csv;
-       	     	                     interval 60;
-       	     	                     property power_A.real,power_A.imag,P_Out,Q_Out;
-	     	     	     };
-             object solar {
-              name sol_9;
-             generator_mode SUPPLY_DRIVEN;
-             generator_status ONLINE;
-             panel_type SINGLE_CRYSTAL_SILICON;
-             efficiency 0.167;
-             area 800;
-             object recorder {	                	       
-	     	              	file V_Out_node15.csv;
-	     	                      interval 60;
-	     	                     // limit 86400;
-	     	           	property V_Out,I_Out,VA_Out.real;
-	     	     	     };
-	
-            };
-          
-      };
+      
       
 
 }
@@ -830,47 +594,21 @@ object triplex_meter {
        file power.player;
      //  loop 1000;
    }; 
-	   //voltage_1 240;
+      object player {
+	  name player10_1;
+       property power_2;
+       file power.player;
+     //  loop 1000;
+   }; 
+	  //voltage_1 240;
 	   nominal_voltage 120;
 	   //voltage_N 0;
        groupid House_Meter;
 	   object recorder {	                	       
        	     	              	file measured_voltage_1_node16.csv;
-       	     	                     interval 60;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power,measured_reactive_power;
+       	     	                     interval 3600;
+       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
 	     	     	     };
-      object inverter {
-       name inv_10;
-        phases AS;
-       four_quadrant_control_mode CONSTANT_PQ;
-       generator_status ONLINE;
-       inverter_type FOUR_QUADRANT;
-	   rated_power 8400;
-	   //P_Out 6250;
-	   Q_Out 0;
-	   use_multipoint_efficiency FALSE;
-        object recorder {	                	       
-       	     	              	file Power_A_node16.csv;
-       	     	                     interval 60;
-       	     	                     property power_A.real,power_A.imag,P_Out,Q_Out;
-	     	     	     };
-             object solar {
-             name sol_10;
-             generator_mode SUPPLY_DRIVEN;
-             generator_status ONLINE;
-             panel_type SINGLE_CRYSTAL_SILICON;
-             efficiency 0.167;
-             area 800;
-             object recorder {	                	       
-	     	              	file V_Out_node16.csv;
-	     	                      interval 60;
-	     	                     // limit 86400;
-	     	           	property V_Out,I_Out,VA_Out.real;
-	     	     	     };
-	
-            };
-          
-      };
       
 
 }
@@ -915,47 +653,21 @@ object triplex_meter{
        file power.player;
      //  loop 1000;
    }; 
+	   object player {
+       name player11_1;
+       property power_2;
+       file power.player;
+     //  loop 1000;
+   }; 
 	   //voltage_1 240;
 	   //voltage_N 0;
 	    nominal_voltage 120;
        groupid House_Meter;
 	   object recorder {	                	       
        	     	              	file measured_voltage_1_node18.csv;
-       	     	                     interval 60;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power,measured_reactive_power;
+       	     	                     interval 3600;
+       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
 	     	     	     };
-      object inverter {
-       name inv_11;
-        phases AS;
-       four_quadrant_control_mode CONSTANT_PQ;
-       generator_status ONLINE;
-       inverter_type FOUR_QUADRANT;
-	   rated_power 8400;
-	   //P_Out 6250;
-	   Q_Out 0;
-	   use_multipoint_efficiency FALSE;
-        object recorder {	                	       
-       	     	              	file Power_A_node18.csv;
-       	     	                     interval 60;
-       	     	                     property power_A.real,power_A.imag,P_Out,Q_Out;
-	     	     	     };
-             object solar {
-              name sol_11;
-             generator_mode SUPPLY_DRIVEN;
-             generator_status ONLINE;
-             panel_type SINGLE_CRYSTAL_SILICON;
-             efficiency 0.167;
-             area 800;
-             object recorder {	                	       
-	     	              	file V_Out_node18.csv;
-	     	                      interval 60;
-	     	                     // limit 86400;
-	     	           	property V_Out,I_Out,VA_Out.real;
-	     	     	     };
-	
-            };
-          
-      };
       
 
 }
@@ -984,47 +696,21 @@ object triplex_meter {
        file power.player;
      //  loop 1000;
    }; 
+	   object player {
+       name player12_1;
+       property power_2;
+       file power.player;
+     //  loop 1000;
+   }; 
 	   //voltage_1 240;
 	   //voltage_N 0;
 	    nominal_voltage 120;
        groupid House_Meter;
 	   object recorder {	                	       
        	     	              	file measured_voltage_1_node19.csv;
-       	     	                     interval 60;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power,measured_reactive_power;
+       	     	                     interval 3600;
+       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
 	     	     	     };
-      object inverter {
-       name inv_12;
-        phases AS;
-       four_quadrant_control_mode CONSTANT_PQ;
-       generator_status ONLINE;
-       inverter_type FOUR_QUADRANT;
-	   rated_power 8400;
-	   //P_Out 6250;
-	   Q_Out 0;
-	   use_multipoint_efficiency FALSE;
-        object recorder {	                	       
-       	     	              	file Power_A_node19.csv;
-       	     	                     interval 60;
-       	     	                     property power_A.real,power_A.imag,P_Out,Q_Out;
-	     	     	     };
-             object solar {
-             name sol_12;
-             generator_mode SUPPLY_DRIVEN;
-             generator_status ONLINE;
-             panel_type SINGLE_CRYSTAL_SILICON;
-             efficiency 0.167;
-             area 800;
-             object recorder {	                	       
-	     	              	file V_Out_node19.csv;
-	     	                      interval 60;
-	     	                     // limit 86400;
-	     	           	property V_Out,I_Out,VA_Out.real;
-	     	     	     };
-	
-            };
-          
-      };
       
 
 }
