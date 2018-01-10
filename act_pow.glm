@@ -1,722 +1,535 @@
 #set profiler=1
 //#set threadcount=1;
 //#set relax_naming_rules=1
-#set minimum_timestep=3600;
+#set minimum_timestep=60;
 
 clock {
-	timestamp '2009-11-01 00:00:00';
-	stoptime '2009-11-01 10:00:00';
-	timezone PST+8PDT;
+	timezone PST+8;
+	timestamp '2014-01-01 00:00:00';
+	stoptime '2014-12-31 23:59:00';
 	
 }
 
-
 module powerflow;
-module generators;
 module tape;
-module climate;
-module residential;
 
 
 module powerflow {
     solver_method NR;
-
+	line_limits FALSE;
+	//line_capacitance true;
+	line_capacitance true;
 }
-//module tape;//for player to make load dyanmic
+//module tape;//for player to make load dyanmic load 0.45 MW
 
 #define stylesheet=http://gridlab-d.svn.sourceforge.net/viewvc/gridlab-d/trunk/core/gridlabd-2_0
-
-
-
-object triplex_line_conductor {
-	name tp_line_conductor_OH;
-	resistance 0.557;
-	geometric_mean_radius 0.01366988;
-};
-
-// Triplex Line
-object triplex_line_configuration {
-	name triplex_line_configuration_OH;
-	conductor_1 tp_line_conductor_OH;
-	conductor_2 tp_line_conductor_OH;
-	conductor_N tp_line_conductor_OH;
-	insulation_thickness 0.08;
-	diameter 0.4212598;
-}
-
-object triplex_line_conductor {
-	name tp_line_conductor_UG;
-	resistance 0.884;
-	geometric_mean_radius 0.010897;
-};
-
-// Triplex Line
-object triplex_line_configuration {
-	name triplex_line_configuration_UG;
-	conductor_1 tp_line_conductor_UG;
-	conductor_2 tp_line_conductor_UG;
-	conductor_N tp_line_conductor_UG;
-	insulation_thickness 0.08;
-	diameter 0.3358268;
-}
-
- object transformer_configuration {
-	name transformer_configuration_1418;
-	connect_type SINGLE_PHASE_CENTER_TAPPED;
+object transformer_configuration {
+	name transformer_configuration_1418_A;
+	connect_type SINGLE_PHASE;
 	install_type PADMOUNT;
-	primary_voltage 14400 V;
-	secondary_voltage 122.4 V;
-	//power_rating 150.0;
+	primary_voltage 14400.0 V;
+	secondary_voltage 244.8 V;
 	powerA_rating 75.0;
-	//resistance 0.013;
-	//reactance 0.0348;
-	resistance 0.01716;
-	reactance 0.03575;
+	resistance 0.018;
+	reactance 0.045;
+}
+				
+
+
+
+object line_configuration {
+	name triplex_line_configuration_OH;
+	    z11 1.1137+0.291218j;//0.860999+0.806922j;
+		z12 0;
+		z13 0;
+		z21 0;
+		z22 0;
+		z23 0;
+		z31 0;
+		z32 0;
+		z33 0;
+		c11 72 nF/km;
 }
 
-//measured_voltage_A
+object line_configuration {
+	name triplex_line_configuration_UG;
+	    z11  1.76706+0.279085j;//0.860999+0.806922j;
+		z12 0;
+		z13 0;
+		z21 0;
+		z22 0;
+		z23 0;
+		z31 0;
+		z32 0;
+		z33 0;
+		c11 55 nF/km;
+}
 
+
+// Defining distribution network .................................
 object meter {
-	name node1;
+	name substation;
 	phases "ABCN";
 	bustype SWING;
 	voltage_A +14400+0.000j;
 	voltage_B -7200-12470.765j;
-	voltage_C -7200+12470.765j;
+	voltage_C -7200+12470.76j;
 	nominal_voltage 14400;
-	object recorder {	                	       
-       	     	              	file measured_voltage_A.csv;
-       	     	                     interval 3600;
-       	     	                     property measured_voltage_A;
-	     	     	     };
 }
+
+
+		
 
 object transformer {
-	name distribution_transformer;
-	phases AS;
-	from node1;
-	to node2;
-	configuration transformer_configuration_1418;
+	name distribution_transformer_N6A_D;
+	phases AN;
+	from substation;
+	to N6A_D1;
+	configuration transformer_configuration_1418_A;
 }
 
-object triplex_meter {
-	name node2;
-	phases AS;
-//	voltage_1 240+0j;		
-//	current_1  1.0;
-//	power_1 1000+2000j;	
-//	shunt_1 5.3333e-004 -2.6667e-004i;	
-	nominal_voltage 120;
-	//voltage_N 0;
+object meter {
+	name N6A_D1;
+	phases AN;
+	nominal_voltage 240;	
+}
+
+///////////////////////////////////////////////////
+object overhead_line {
+	name LN6A_DH1;
+	phases AN;
+	from N6A_D1;
+	to PV_N6A_DH1;
+	length 65.6168;
+	configuration triplex_line_configuration_UG;
+}
+
+object meter{
+       name meter_PV_N6A_DH1;
+       phases AN;
+	   nominal_voltage 240;
+       groupid House_Meter;   	   
+}
+
+
+/////////////////////////////////////////////////////////////////////////	
+
+object overhead_line {
+	name LN6A_DH2;
+	phases AN;
+	from N6A_D1;
+	to PV_N6A_DH2;
+	length 65.6168;
+	configuration triplex_line_configuration_UG;
+}
+
+object meter {
+       name meter_PV_N6A_DH2;
+       phases AN;
+  	   nominal_voltage 240;
+       groupid House_Meter;
+	   
+
+}
+
+////modularity start here
+
+object overhead_line {
+	name LN6A_D1;
+	phases AN;
+	from N6A_D1;
+	to N6A_D2;
+	length 65.6168;
+	configuration triplex_line_configuration_OH;
+}
+
+object node {
+	name N6A_D2;
+	phases AN;
+	nominal_voltage 240;
+}
+
+///////////////////////////////////////////////////
+object overhead_line {
+	name LN6A_DH3;
+	phases AN;
+	from N6A_D2;
+	to PV_N6A_DH3;
+	length 65.6168;
+	configuration triplex_line_configuration_UG;
+}
+
+
+object meter {
+       name meter_PV_N6A_DH3;
+       phases AN;
+  	   nominal_voltage 240;
+       groupid House_Meter;
+	   
+
+}
+
+
+/////////////////////////////////////////////////////////////////////////	
+
+object overhead_line {
+	name LN6A_DH4;
+	phases AN;
+	from N6A_D2;
+	to PV_N6A_DH4;
+	length 65.6168;
+	configuration triplex_line_configuration_UG;
+}
+
+
+object meter {
+       name meter_PV_N6A_DH4;
+       phases AN;
+  	   nominal_voltage 240;
+       groupid House_Meter;
+}
+///modularity ends
+
+////modularity start here
+
+object overhead_line {
+	name LN6A_D2;
+	phases AN;
+	from N6A_D2;
+	to N6A_D3;
+	length 65.6168;
+	configuration triplex_line_configuration_OH;
+}
+
+object meter {
+	name N6A_D3;
+	phases AN;
+	nominal_voltage 240;
+}
+
+///////////////////////////////////////////////////
+object overhead_line {
+	name LN6A_DH5;
+	phases AN;
+	from N6A_D3;
+	to PV_N6A_DH5;
+	length 65.6168;
+	configuration triplex_line_configuration_UG;
+}
+
+
+object meter {
+       name meter_PV_N6A_DH5;
+       phases AN;
+  	   nominal_voltage 240;
+       groupid House_Meter;
+	   
+
+}
+
+
+/////////////////////////////////////////////////////////////////////////	
+
+object overhead_line {
+	name LN6A_DH6;
+	phases AN;
+	from N6A_D3;
+	to PV_N6A_DH6;
+	length 65.6168;
+	configuration triplex_line_configuration_UG;
+}
+
+
+
+
+object meter {
+       name meter_PV_N6A_DH6;
+       phases AN;
+  	   nominal_voltage 240;
+       groupid House_Meter;
+}
+///modularity ends
+
+////modularity start here
+
+object overhead_line {
+	name LN6A_D3;
+	phases AN;
+	from N6A_D3;
+	to N6A_D4;
+	length 65.6168;
+	configuration triplex_line_configuration_OH;
+}
+
+object meter {
+	name N6A_D4;
+	phases AN;
+	nominal_voltage 240;
+}
+
+///////////////////////////////////////////////////
+object overhead_line {
+	name LN6A_DH7;
+	phases AN;
+	from N6A_D4;
+	to PV_N6A_DH7;
+	length 65.6168;
+	configuration triplex_line_configuration_UG;
+}
+
+
+object meter {
+       name meter_PV_N6A_DH7;
+       phases AN;
+  	   nominal_voltage 240;
+       groupid House_Meter;	   
+
+}
+
+
+/////////////////////////////////////////////////////////////////////////	
+
+object overhead_line {
+	name LN6A_DH8;
+	phases AN;
+	from N6A_D4;
+	to PV_N6A_DH8;
+	length 65.6168;
+	configuration triplex_line_configuration_UG;
+}
+
+
+
+
+object meter {
+       name meter_PV_N6A_DH8;
+       phases AN;
+  	   nominal_voltage 240;
+       groupid House_Meter;
+}
+///modularity ends
+
+////modularity start here
+
+object overhead_line {
+	name LN6A_D4;
+	phases AN;
+	from N6A_D4;
+	to N6A_D5;
+	length 65.6168;
+	configuration triplex_line_configuration_OH;
+}
+
+object meter {
+	name N6A_D5;
+	phases AN;
+	nominal_voltage 240;
+}
+
+///////////////////////////////////////////////////
+object overhead_line {
+	name LN6A_DH9;
+	phases AN;
+	from N6A_D5;
+	to PV_N6A_DH9;
+	length 65.6168;
+	configuration triplex_line_configuration_UG;
+}
+
+
+object meter {
+       name meter_PV_N6A_DH9;
+       phases AN;
+  	   nominal_voltage 240;
+       groupid House_Meter;	   
+
+}
+
+
+/////////////////////////////////////////////////////////////////////////	
+
+object overhead_line {
+	name LN6A_DH10;
+	phases AN;
+	from N6A_D5;
+	to PV_N6A_DH10;
+	length 65.6168;
+	configuration triplex_line_configuration_UG;
+}
+
+
+
+
+object meter {
+       name meter_PV_N6A_DH10;
+       phases AN;
+  	   nominal_voltage 240;
+       groupid House_Meter;
+}
+///modularity ends
+
+
+////modularity start here
+
+object overhead_line {
+	name LN6A_D5;
+	phases AN;
+	from N6A_D5;
+	to N6A_D6;
+	length 65.6168;
+	configuration triplex_line_configuration_OH;
+}
+
+object meter {
+	name N6A_D6;
+	phases AN;
+	nominal_voltage 240;
+}
+
+///////////////////////////////////////////////////
+object overhead_line {
+	name LN6A_DH11;
+	phases AN;
+	from N6A_D6;
+	to PV_N6A_DH11;
+	length 65.6168;
+	configuration triplex_line_configuration_UG;
+}
+
+
+object meter {
+       name meter_PV_N6A_DH11;
+       phases AN;
+  	   nominal_voltage 240;
+       groupid House_Meter;	   
+
+}
+
+
+/////////////////////////////////////////////////////////////////////////	
+
+object overhead_line {
+	name LN6A_DH12;
+	phases AN;
+	from N6A_D6;
+	to PV_N6A_DH12;
+	length 65.6168;
+	configuration triplex_line_configuration_UG;
+}
+
+
+
+
+object meter {
+       name meter_PV_N6A_DH12;
+       phases AN;
+  	   nominal_voltage 240;
+       groupid House_Meter;
+}
+///modularity ends
+
+object load{
+		name PV_N6A_DH1;
+		parent meter_PV_N6A_DH1;
+		phases AN;
+  	    nominal_voltage 240;
+        groupid house_meter;
+	}
+object load{
+		name PV_N6A_DH2;
+		parent meter_PV_N6A_DH2;
+		phases AN;
+  	    nominal_voltage 240;
+        groupid house_meter;
+	}
+object load{
+		name PV_N6A_DH3;
+		parent meter_PV_N6A_DH3;
+		phases AN;
+  	    nominal_voltage 240;
+        groupid house_meter;
+	}
+object load{
+		name PV_N6A_DH4;
+		parent meter_PV_N6A_DH4;
+		phases AN;
+  	    nominal_voltage 240;
+        groupid house_meter;
+	}
+
+object load{
+		name PV_N6A_DH5;
+		parent meter_PV_N6A_DH5;
+		phases AN;
+  	    nominal_voltage 240;
+        groupid house_meter;
+	}
+object load{
+		name PV_N6A_DH6;
+		parent meter_PV_N6A_DH6;
+		phases AN;
+  	    nominal_voltage 240;
+        groupid house_meter;
+	}
+object load{
+		name PV_N6A_DH7;
+		parent meter_PV_N6A_DH7;
+		phases AN;
+  	    nominal_voltage 240;
+        groupid house_meter;
+	}
+object load{
+		name PV_N6A_DH8;
+		parent meter_PV_N6A_DH8;
+		phases AN;
+  	    nominal_voltage 240;
+        groupid house_meter;
+	}
 	
-	object recorder {	                	       
-       	     	              	file measured_voltage_distribution_transformer.csv;
-       	     	                     interval 3600;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
-	     	     	     };
+object load{
+		name PV_N6A_DH9;
+		parent meter_PV_N6A_DH9;
+		phases AN;
+  	    nominal_voltage 240;
+        groupid house_meter;
+	}
+object load{
+		name PV_N6A_DH10;
+		parent meter_PV_N6A_DH10;
+		phases AN;
+  	    nominal_voltage 240;
+        groupid house_meter;
+	}
+object load{
+		name PV_N6A_DH11;
+		parent meter_PV_N6A_DH11;
+		phases AN;
+  	    nominal_voltage 240;
+        groupid house_meter;
+	}
+object load{
+		name PV_N6A_DH12;
+		parent meter_PV_N6A_DH12;
+		phases AN;
+  	    nominal_voltage 240;
+        groupid house_meter;
+	}	
+
 	
-}
 
-///////////////////////////////////////////////////
-object triplex_line {
-	name triplex_line_UG_1;
-	phases AS;
-	from node2;
-	to node3;
-	length 65.6168;
-	configuration triplex_line_configuration_UG;
-}
-object triplex_meter{
-       name node3;
-       phases AS;
-	   object player {
-       name player1;
-       property power_1;
-       file power.player;
-     //  loop 1000;
-   }; 
-   object player {
-       name player1_1;
-   	   property power_2;
-       file power.player;
-     //  loop 1000;
-   }; 
-	   //voltage_N 0;
-	   ////voltage_1 240;
-	    //voltage_2 240;
-	   nominal_voltage 120;
-       groupid House_Meter;
-	   	   object recorder {	                	       
-       	     	              	file measured_voltage_1_node3.csv;
-       	     	                     interval 3600;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
-	     	     	     };
-      
-      
-
+object group_recorder {
+	property measured_voltage_A;
+	file csv_output/pv_triplex_meter_voltage.csv;
+	group "groupid=House_Meter";
+	interval 60.0;
+	complex_part MAG;
 }
 
 
-/////////////////////////////////////////////////////////////////////////	
-
-object triplex_line {
-	name triplex_line_UG_2;
-	phases AS;
-	from node2;
-	to node4;
-	length 65.6168;
-	configuration triplex_line_configuration_UG;
+object group_recorder {
+	property measured_power_A;
+	file csv_output/pv_triplex_meter_power.csv;
+	group "groupid=House_Meter";
+	interval 60.0;
+	complex_part REAL;
 }
-
-
-
-
-object triplex_meter {
-       name node4;
-       phases AS;
-       object player {
-       name player2;
-       property power_1;
-       file power.player;
-     //  loop 1000;
-   }; 
-   object player {
-       name player2_1;
-       property power_2;
-       file power.player;
-     //  loop 1000;
-   }; 
-		//voltage_N 0;
-	   //voltage_1 240;
-	   nominal_voltage 120;
-       groupid House_Meter;
-	   object recorder {	                	       
-       	     	              	file measured_voltage_1_node4.csv;
-       	     	                     interval 3600;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
-	     	     	     };
-      
-      
-
-}
-
-////modularity start here
-
-object triplex_line {
-	name triplex_line_OH_1;
-	phases AS;
-	from node2;
-	to node5;
-	length 65.6168;
-	configuration triplex_line_configuration_OH;
-}
-
-object triplex_node {
-	name node5;
-	phases AS;
-	//voltage_1 240;
-	//voltage_2 240;
-//	current_1  1.0;
-//	power_1 1000+2000j;	
-//	shunt_1 5.3333e-004 -2.6667e-004i;	
-	nominal_voltage 120;
-	//voltage_N 0;
-}
-
-///////////////////////////////////////////////////
-object triplex_line {
-	name triplex_line_UG_3;
-	phases AS;
-	from node5;
-	to node6;
-	length 65.6168;
-	configuration triplex_line_configuration_UG;
-}
-object triplex_meter{
-       name node6;
-       phases AS;
-      object player {
-       name player3;
-       property power_1;
-       file power.player;
-     //  loop 1000;
-   }; 
-	   object player {
-       name player3_1;
-       property power_2;
-       file power.player;
-     //  loop 1000;
-   }; 
-	   //voltage_1 240;
-	   //voltage_N 0;
-	   nominal_voltage 120;
-       groupid House_Meter;
-	   object recorder {	                	       
-       	     	              	file measured_voltage_1_node6.csv;
-       	     	                     interval 3600;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
-	     	     	     };
-      
-      
-
-}
-
-
-/////////////////////////////////////////////////////////////////////////	
-
-object triplex_line {
-	name triplex_line_UG_4;
-	phases AS;
-	from node5;
-	to node7;
-	length 65.6168;
-	configuration triplex_line_configuration_UG;
-}
-
-
-
-
-object triplex_meter {
-       name node7;
-       phases AS;
-       object player {
-       name player4;
-       property power_1;
-       file power.player;
-     //  loop 1000;
-   }; 
-	  object player {
-       name player4_1;
-       property power_2;
-       file power.player;
-     //  loop 1000;
-   };  
-	   //voltage_1 240;
-	   //voltage_N 0;
-	   nominal_voltage 120;
-       groupid House_Meter;
-	   object recorder {	                	       
-       	     	              	file measured_voltage_1_node7.csv;
-       	     	                     interval 3600;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
-	     	     	     };
-      
-
-}
-///modularity ends
-
-////modularity start here
-
-object triplex_line {
-	name triplex_line_OH_2;
-	phases AS;
-	from node5;
-	to node8;
-	length 65.6168;
-	configuration triplex_line_configuration_OH;
-}
-
-object triplex_node {
-	name node8;
-	phases AS;
-	//voltage_1 240;
-	//voltage_N 0;
-//	current_1  1.0;
-//	power_1 1000+2000j;	
-//	shunt_1 5.3333e-004 -2.6667e-004i;	
-	nominal_voltage 120;
-}
-
-///////////////////////////////////////////////////
-object triplex_line {
-	name triplex_line_UG_5;
-	phases AS;
-	from node8;
-	to node9;
-	length 65.6168;
-	configuration triplex_line_configuration_UG;
-}
-object triplex_meter{
-       name node9;
-       phases AS;
-      object player {
-       name player5;
-       property power_1;
-       file power.player;
-     //  loop 1000;
-   }; 
-	  object player {
-       name player5_1;
-       property power_2;
-       file power.player;
-     //  loop 1000;
-   }; 
-	  //voltage_1 240;
-	   //voltage_N 0;
-	   nominal_voltage 120;
-       groupid House_Meter;
-	   object recorder {	                	       
-       	     	              	file measured_voltage_1_node9.csv;
-       	     	                     interval 3600;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
-	     	     	     };
-      
-      
-
-}
-
-
-/////////////////////////////////////////////////////////////////////////	
-
-object triplex_line {
-	name triplex_line_UG_6;
-	phases AS;
-	from node8;
-	to node10;
-	length 65.6168;
-	configuration triplex_line_configuration_UG;
-}
-
-
-
-
-object triplex_meter {
-       name node10;
-       phases AS;
-       object player {
-       name player6;
-       property power_1;
-       file power.player;
-     //  loop 1000;
-   }; 
-	   object player {
-       name player6_1;
-       property power_2;
-       file power.player;
-     //  loop 1000;
-   }; 
-	   //voltage_1 240;
-	   //voltage_N 0;
-	   nominal_voltage 120;
-       groupid House_Meter;
-	   object recorder {	                	       
-       	     	              	file measured_voltage_1_node10.csv;
-       	     	                     interval 3600;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
-	     	     	     };
-      
-      
-
-}
-///modularity ends
-////modularity start here
-
-object triplex_line {
-	name triplex_line_OH_3;
-	phases AS;
-	from node8;
-	to node11;
-	length 65.6168;
-	configuration triplex_line_configuration_OH;
-}
-
-object triplex_node {
-	name node11;
-	phases AS;
-	//voltage_1 240;
-//	current_1  1.0;
-//	power_1 1000+2000j;	
-//	shunt_1 5.3333e-004 -2.6667e-004i;	
-	nominal_voltage 120;
-}
-
-///////////////////////////////////////////////////
-object triplex_line {
-	name triplex_line_UG_7;
-	phases AS;
-	from node11;
-	to node12;
-	length 65.6168;
-	configuration triplex_line_configuration_UG;
-}
-object triplex_meter{
-       name node12;
-       phases AS;
-       object player {
-       name player7;
-       property power_1;
-       file power.player;
-     //  loop 1000;
-   }; 
-	   object player {
-       name player7_1;
-       property power_2;
-       file power.player;
-     //  loop 1000;
-   }; 
-	   //voltage_1 240;
-	   nominal_voltage 120;
-	   //voltage_N 0;
-       groupid House_Meter;
-	   object recorder {	                	       
-       	     	              	file measured_voltage_1_node12.csv;
-       	     	                     interval 3600;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
-	     	     	     };
-      
-      
-
-}
-
-
-/////////////////////////////////////////////////////////////////////////	
-
-object triplex_line {
-	name triplex_line_UG_8;
-	phases AS;
-	from node11;
-	to node13;
-	length 65.6168;
-	configuration triplex_line_configuration_UG;
-}
-
-
-
-
-object triplex_meter {
-       name node13;
-       phases AS;
-       object player {
-       name player8;
-       property power_1;
-       file power.player;
-     //  loop 1000;
-   }; 
-	  object player {
-       name player8_1;
-       property power_2;
-       file power.player;
-     //  loop 1000;
-   }; 
-	  //voltage_1 240;
-	   //voltage_N 0;
-	   nominal_voltage 120;
-       groupid House_Meter;
-	   object recorder {	                	       
-       	     	              	file measured_voltage_1_node13.csv;
-       	     	                     interval 3600;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
-	     	     	     };
-      
-
-}
-///modularity ends
-////modularity start here
-
-object triplex_line {
-	name triplex_line_OH_4;
-	phases AS;
-	from node11;
-	to node14;
-	length 65.6168;
-	configuration triplex_line_configuration_OH;
-}
-
-object triplex_node {
-	name node14;
-	phases AS;
-	//voltage_1 240;
-//	current_1  1.0;
-//	power_1 1000+2000j;	
-//	shunt_1 5.3333e-004 -2.6667e-004i;	
-	nominal_voltage 120;
-}
-
-///////////////////////////////////////////////////
-object triplex_line {
-	name triplex_line_UG_9;
-	phases AS;
-	from node14;
-	to node15;
-	length 65.6168;
-	configuration triplex_line_configuration_UG;
-}
-object triplex_meter{
-       name node15;
-       phases AS;
-       object player {
-       name player9;
-       property power_1;
-       file power.player;
-     //  loop 1000;
-   }; 
-	   object player {
-       name player9_1;
-       property power_2;
-       file power.player;
-     //  loop 1000;
-   }; 
-	   //voltage_1 240;
-	   //voltage_N 0;
-	   nominal_voltage 120;
-       groupid House_Meter;
-	   object recorder {	                	       
-       	     	              	file measured_voltage_1_node15.csv;
-       	     	                     interval 3600;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
-	     	     	     };
-      
-      
-
-}
-
-
-/////////////////////////////////////////////////////////////////////////	
-
-object triplex_line {
-	name triplex_line_UG_10;
-	phases AS;
-	from node14;
-	to node16;
-	length 65.6168;
-	configuration triplex_line_configuration_UG;
-}
-
-
-
-
-object triplex_meter {
-       name node16;
-       phases AS;
-       object player {
-       name player10;
-       property power_1;
-       file power.player;
-     //  loop 1000;
-   }; 
-      object player {
-	  name player10_1;
-       property power_2;
-       file power.player;
-     //  loop 1000;
-   }; 
-	  //voltage_1 240;
-	   nominal_voltage 120;
-	   //voltage_N 0;
-       groupid House_Meter;
-	   object recorder {	                	       
-       	     	              	file measured_voltage_1_node16.csv;
-       	     	                     interval 3600;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
-	     	     	     };
-      
-
-}
-///modularity ends
-////modularity start here
-
-object triplex_line {
-	name triplex_line_OH_5;
-	phases AS;
-	from node14;
-	to node17;
-	length 65.6168;
-	configuration triplex_line_configuration_OH;
-}
-
-object triplex_node {
-	name node17;
-	phases AS;
-	//voltage_1 240;
-//	current_1  1.0;
-//	power_1 1000+2000j;	
-//	shunt_1 5.3333e-004 -2.6667e-004i;	
-	nominal_voltage 120;
-	//voltage_N 0;
-}
-
-///////////////////////////////////////////////////
-object triplex_line {
-	name triplex_line_UG_11;
-	phases AS;
-	from node17;
-	to node18;
-	length 65.6168;
-	configuration triplex_line_configuration_UG;
-}
-object triplex_meter{
-       name node18;
-       phases AS;
-       object player {
-       name player11;
-       property power_1;
-       file power.player;
-     //  loop 1000;
-   }; 
-	   object player {
-       name player11_1;
-       property power_2;
-       file power.player;
-     //  loop 1000;
-   }; 
-	   //voltage_1 240;
-	   //voltage_N 0;
-	    nominal_voltage 120;
-       groupid House_Meter;
-	   object recorder {	                	       
-       	     	              	file measured_voltage_1_node18.csv;
-       	     	                     interval 3600;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
-	     	     	     };
-      
-
-}
-
-
-/////////////////////////////////////////////////////////////////////////	
-
-object triplex_line {
-	name triplex_line_UG_12;
-	phases AS;
-	from node17;
-	to node19;
-	length 65.6168;
-	configuration triplex_line_configuration_UG;
-}
-
-
-
-
-object triplex_meter {
-       name node19;
-       phases AS;
-       object player {
-       name player12;
-       property power_1;
-       file power.player;
-     //  loop 1000;
-   }; 
-	   object player {
-       name player12_1;
-       property power_2;
-       file power.player;
-     //  loop 1000;
-   }; 
-	   //voltage_1 240;
-	   //voltage_N 0;
-	    nominal_voltage 120;
-       groupid House_Meter;
-	   object recorder {	                	       
-       	     	              	file measured_voltage_1_node19.csv;
-       	     	                     interval 3600;
-       	     	                     property measured_voltage_1.real, measured_voltage_1.imag,measured_real_power;
-	     	     	     };
-      
-
-}
-///modularity ends
-
-
-
-
-
